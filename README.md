@@ -9,6 +9,7 @@ Projet réalise dans le cadre de l'UE "Projet MIDL 1" de L2. L'objectif est ... 
 ## Auteurs
 ---
 BRÉMOND Kylian - 22500502
+
 FRANÇOIS Elise - 22501097
 
 
