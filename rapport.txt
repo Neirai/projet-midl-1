@@ -1,6 +1,0 @@
-fonction compterFeuilleForm : pb avec le cas Not
-ne fonctionne pas, pour une formule Not(a), avec a de type Form,
-ça va direct dans le case par défaut
-
-pb : jeu de test, 
-g = Not("a") au lieu de Not(Var("a")).
