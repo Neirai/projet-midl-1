@@ -12,18 +12,15 @@ def compterFeuilleForm(f: Form) -> int:
     Fonction comptant le nombre de variables
     et constantes ("feuilles") d'une formule
     """
-    nb = 0
     match f:
-        case Var(a):
-            return nb + 1
-        case FF():
-            return nb + 1
-        case Impl(a,b) | And(a,b) | Or(a,b):
+        case Var(_) | FF():
+            return 1
+        case Impl(a, b) | And(a, b) | Or(a, b):
             return compterFeuilleForm(a) + compterFeuilleForm(b)
         case Not(a):
             return compterFeuilleForm(a)
         case f:
-            raise ValueError("[NO IDEA YET]")
+            raise ValueError(f"Formule non reconnue : {f}")
     
     
 def getVarFromForm(f: Form) -> list:
@@ -31,53 +28,39 @@ def getVarFromForm(f: Form) -> list:
     Fonction renvoyant la liste
     des variables d'une formule
     """
-    L, L_right = [], []
-    
     match f:
         case Var(a):
-            L.append(a)
-            return L
+            return [a]
         case FF():
-            return L
-        case And(a,b) | Or(a,b) | Impl(a,b):
-            L = getVarFromForm(a)
-            L_right = getVarFromForm(b)
-            for elem in L_right:
-                if elem not in L:
-                    L.append(elem)
+            return []
+        case And(a, b) | Or(a, b) | Impl(a, b):
+            return list(set(getVarFromForm(a) + getVarFromForm(b)))
         case Not(a):
-            L = getVarFromForm(a)
+            return list(set(getVarFromForm(a)))
         case f:
-            raise ValueError("[NO INSPO]")
-    return L
+            raise ValueError(f"Formule non reconnue : {f}")
 
 def formToNNF(f: Form) -> Form:
+    """
+    Fonction mettant une formule
+    en forme normale négative
+    """
     match f:
-        case Var(a):
-            return a
-        case FF():
+        case Var(_) | FF() | Not(Var(_)) | Not(FF()):
             return f
-        case And(a,b):
-            return And(formToNNF(a),formToNNF(b))
-        case Or(a,b):
-            return Or(formToNNF(a),formToNNF(b))
-        case Impl(a,b):
-            return Or(formToNNF(Not(a)),formToNNF(b))
-        case Not(a):
-            match a:
-                case Var(form):
-                    return f
-                case FF():
-                    return f
-                case And(left,right):
-                    return Or(formToNNF(Not(left)),formToNNF(Not(right)))
-                case Or(left,right):
-                    return And(formToNNF(Not(left)),formToNNF(Not(right)))
-                case Impl(left,right):
-                    return Or(formToNNF(left),formToNNF(Not(right)))
-                case Not(form):
-                    return formToNNF(form)
-                case a:
-                    raise ValueError("[NO INSPO]")
+        case And(a, b):
+            return And(formToNNF(a), formToNNF(b))
+        case Or(a, b):
+            return Or(formToNNF(a), formToNNF(b))
+        case Impl(a, b):
+            return Or(formToNNF(Not(a)), formToNNF(b))
+        case Not(Not(a)):
+            return formToNNF(a)
+        case Not(And(a, b)):
+            return Or(formToNNF(Not(a)), formToNNF(Not(b)))
+        case Not(Or(a, b)):
+            return And(formToNNF(Not(a)), formToNNF(Not(f)))
+        case Not(Impl(a, b)):
+            return And(formToNNF(a), formToNNF(Not(b)))
         case f:
-            raise ValueError("[NO INSPO]")
+            raise ValueError(f"Impossible de transformer en NNF : {f}")
