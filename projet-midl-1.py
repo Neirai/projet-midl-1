@@ -18,11 +18,7 @@ def compterFeuilleForm(f: Form) -> int:
             return nb + 1
         case FF():
             return nb + 1
-        case Impl(a,b):
-            return compterFeuilleForm(a) + compterFeuilleForm(b)
-        case And(a,b):
-            return compterFeuilleForm(a) + compterFeuilleForm(b)
-        case Or(a,b):
+        case Impl(a,b) | And(a,b) | Or(a,b):
             return compterFeuilleForm(a) + compterFeuilleForm(b)
         case Not(a):
             return compterFeuilleForm(a)
@@ -54,4 +50,34 @@ def getVarFromForm(f: Form) -> list:
         case f:
             raise ValueError("[NO INSPO]")
     return L
-    
+
+def formToNNF(f: Form) -> Form:
+    match f:
+        case Var(a):
+            return a
+        case FF():
+            return f
+        case And(a,b):
+            return And(formToNNF(a),formToNNF(b))
+        case Or(a,b):
+            return Or(formToNNF(a),formToNNF(b))
+        case Impl(a,b):
+            return Or(formToNNF(Not(a)),formToNNF(b))
+        case Not(a):
+            match a:
+                case Var(form):
+                    return f
+                case FF():
+                    return f
+                case And(left,right):
+                    return Or(formToNNF(Not(left)),formToNNF(Not(right)))
+                case Or(left,right):
+                    return And(formToNNF(Not(left)),formToNNF(Not(right)))
+                case Impl(left,right):
+                    return Or(formToNNF(left),formToNNF(Not(right)))
+                case Not(form):
+                    return formToNNF(form)
+                case a:
+                    raise ValueError("[NO INSPO]")
+        case f:
+            raise ValueError("[NO INSPO]")
