@@ -64,3 +64,33 @@ def formToNNF(f: Form) -> Form:
             return And(formToNNF(a), formToNNF(Not(b)))
         case f:
             raise ValueError(f"Impossible de transformer en NNF : {f}")
+
+
+
+
+# Start
+
+def insert_forms(lf: list[Form], f: list[Form]) -> list[Form]:
+    return list(set(lf + f))
+
+def s_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s) :
+        case ([], Seq(_, a)):
+            return a != FF()
+        case _:
+            return False
+
+def s_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([], Seq(g, a)):
+            return [Seq(insert_forms (g, [Not(a)]), FF())]
+        case _:
+            return []
+
+
+s1 = Seq([Var("p")], Var("q"))
+print("Applicable ?", s_t_appcond([], s1))
+res = s_t_action([], s1)
+print("Resultat : ", end="")
+for s in res:
+    print(s)
