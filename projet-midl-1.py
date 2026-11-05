@@ -23,7 +23,7 @@ def compterFeuilleForm(f: Form) -> int:
             raise ValueError(f"Formule non reconnue : {f}")
     
     
-def getVarFromForm(f: Form) -> list:
+def getVarFromForm(f: Form) -> list[str]:
     """
     Fonction renvoyant la liste
     des variables d'une formule
@@ -68,7 +68,7 @@ def formToNNF(f: Form) -> Form:
 
 
 
-# Start
+#Start
 
 def insert_forms(lf: list[Form], f: list[Form]) -> list[Form]:
     return list(set(lf + f))
@@ -83,10 +83,11 @@ def s_t_appcond(fs: list[Form], s: Seq) -> bool:
 def s_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match (fs, s):
         case ([], Seq(g, a)):
-            return [Seq(insert_forms (g, [Not(a)]), FF())]
+            return [Seq(insert_forms(g, [Not(a)]), FF())]
         case _:
             return []
 
+s_t_rule = Rule("s_t", s_t_appcond , s_t_action )
 
 s1 = Seq([Var("p")], Var("q"))
 print("Applicable ?", s_t_appcond([], s1))
@@ -94,3 +95,64 @@ res = s_t_action([], s1)
 print("Resultat : ", end="")
 for s in res:
     print(s)
+    
+    
+#Aand
+
+def not_both_in(a: list[Form], b: list[Form], g: list[Form]) -> bool:
+    return (a not in g) and (b not in g)
+    
+    
+def a_and_t_appcond (fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([And(a, b)], Seq(g, FF())):
+            return (not_both_in (a, b, g))
+        case _:
+            return (False)
+        
+def a_and_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([And(a, b)], Seq(g, FF())):
+            return [Seq(insert_forms(g, [a, b]), FF())]
+        case _:
+            return []
+    
+a_and_t_rule = Rule("a_and_t", a_and_t_appcond, a_and_t_action)
+    
+    
+#Axiome C
+
+def axc_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([a], Seq(g, FF())):
+            return Not(a) in g
+        case _:
+            return False
+        
+def axc_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([a], Seq(g, FF())):
+            return []
+        case _:
+            return []
+        
+axc_t_rule = Rule("axc_t", axc_t_appcond, axc_t_action)
+
+
+#Negation
+
+def n_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([Not(Not(a))], Seq(g, FF())):
+            return a not in g
+        case _:
+            return False
+        
+def n_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([Not(Not(a))], Seq(g, FF())):
+            return [Seq(insert_forms(g, a), FF())]
+        case _:
+            return []
+        
+n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
