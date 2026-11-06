@@ -100,11 +100,7 @@ for s in res:
 #Aand
 
 def not_both_in(a: list[Form], b: list[Form], g: list[Form]) -> bool:
-<<<<<<< HEAD
     return (a not in g) or (b not in g)
-=======
-    return (a not in g) and (b not in g)
->>>>>>> e956e06f9da42ef8d3fcd02e5d89a207b045150f
     
     
 def a_and_t_appcond (fs: list[Form], s: Seq) -> bool:
@@ -159,7 +155,6 @@ def n_t_action(fs: list[Form], s: Seq) -> list[Seq]:
         case _:
             return []
         
-<<<<<<< HEAD
 n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
 
 
@@ -180,6 +175,3 @@ def next_proof_state(ls: list[Seq]) -> list[list[Seq]]:
     L = []
     for fs in ls:
         lbool = is_applicable
-=======
-n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
->>>>>>> e956e06f9da42ef8d3fcd02e5d89a207b045150f
