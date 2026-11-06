@@ -71,7 +71,11 @@ def formToNNF(f: Form) -> Form:
 #Start
 
 def insert_forms(lf: list[Form], f: list[Form]) -> list[Form]:
-    return list(set(lf + f))
+    new_list = lf.copy()
+    for elem in f:
+        if elem not in lf:
+            new_list += [elem]
+    return new_list
 
 def s_t_appcond(fs: list[Form], s: Seq) -> bool:
     match (fs, s) :
@@ -89,14 +93,7 @@ def s_t_action(fs: list[Form], s: Seq) -> list[Seq]:
 
 s_t_rule = Rule("s_t", s_t_appcond , s_t_action )
 
-s1 = Seq([Var("p")], Var("q"))
-print("Applicable ?", s_t_appcond([], s1))
-res = s_t_action([], s1)
-print("Resultat : ", end="")
-for s in res:
-    print(s)
-    
-    
+
 #Aand
 
 def not_both_in(a: list[Form], b: list[Form], g: list[Form]) -> bool:
@@ -145,13 +142,13 @@ def n_t_appcond(fs: list[Form], s: Seq) -> bool:
     match (fs, s):
         case ([Not(Not(a))], Seq(g, FF())):
             return a not in g
-        case _:
+        case _: 
             return False
         
 def n_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match (fs, s):
         case ([Not(Not(a))], Seq(g, FF())):
-            return [Seq(insert_forms(g, a), FF())]
+            return [Seq(insert_forms(g, [a]), FF())]
         case _:
             return []
         
@@ -161,17 +158,47 @@ n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
 
 # Partie 4.3.1
 
-def is_applicable(fs: list[Form], s: Seq) -> bool:
-    s_t = s_t_appcond(fs, s)
-    a_and_t = a_and_t_appcond(fs, s)
-    axc_t = axc_t_appcond(fs, s)
-    n_t = n_t_appcond(fs, s)
+# pas convaincu parce qu'on a déjà des truc n_t_rule axc_t_rule etc
 
-    L = [s_t, a_and_t, axc_t, n_t]
-    return L
+# def is_applicable(fs: list[Form], s: Seq) -> bool:
+#     s_t = s_t_appcond(fs, s)
+#     a_and_t = a_and_t_appcond(fs, s)
+#     axc_t = axc_t_appcond(fs, s)
+#     n_t = n_t_appcond(fs, s)
+
+#     L = [s_t, a_and_t, axc_t, n_t]
+#     return L
 
 
-def next_proof_state(ls: list[Seq]) -> list[list[Seq]]:
-    L = []
-    for fs in ls:
-        lbool = is_applicable
+# Je sais pas ce que t'as fait mais je te le laisse ça
+
+# def next_proof_state(ls: list[Seq]) -> list[list[Seq]]:
+#     L = []
+#     for fs in ls:
+#         lbool = is_applicable
+
+
+calcul = [s_t_rule, a_and_t_rule, axc_t_rule, n_t_rule]
+
+def next_proof_state(ps: ProofStateV0) -> list[ProofStateV0]:
+    
+    # sécurité si la liste donnée est vide
+    if ps == []:
+        return ps
+    
+    seq = ps[0]
+    nextProofState = []
+    
+    for rule in calcul:
+        if rule.appcond([], seq):
+            ProofStateV1 = rule.action([], seq) + ps[1:]
+            nextProofState.append(ProofStateV1)
+   
+    for hyp in seq.hyps:
+        for rule in calcul:
+            if rule.appcond([hyp], seq):
+                ProofStateV1 = rule.action([hyp], seq) + ps[1:]
+                nextProofState.append(ProofStateV1)
+                                
+    return nextProofState
+
