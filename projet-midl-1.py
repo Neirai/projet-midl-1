@@ -1,4 +1,5 @@
 from datastructs import *
+from typing import TypeVar
 
 ######################################
 #                                    #
@@ -202,3 +203,31 @@ def next_proof_state(ps: ProofStateV0) -> list[ProofStateV0]:
                                 
     return nextProofState
 
+# 4.4
+
+# Algorithmes donnés
+
+PS = TypeVar("PS")
+
+def dfs (nexts: Callable [[PS], list[PS]],
+        sol: Callable [[PS], bool],
+        states: list[PS]) -> list[PS]:
+        
+        if states == []:
+            return ([])
+        else:
+            if sol(states [0]):
+                return [states [0]]
+            # si vous souhaitez continuer la recherche , decommentez :
+            # return [states [0]] + dfs(nexts , sol , nexts(states [0]) + states [1:])
+            else:
+                return dfs(nexts , sol , nexts(states [0]) + states [1:])
+            
+def nexts_nat (n: int) -> int:
+    if n < 20:
+        return [2 * n, 2 * n + 1]
+    else:
+        return []
+    
+def sol_nat (n: int) -> bool:
+    return (n % 5 == 0)
