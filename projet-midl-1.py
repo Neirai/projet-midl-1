@@ -68,6 +68,7 @@ def formToNNF(f: Form) -> Form:
 
 
 
+#Partie 4.2
 
 #Start
 
@@ -156,28 +157,14 @@ def n_t_action(fs: list[Form], s: Seq) -> list[Seq]:
 n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
 
 
+#Axiome F
+
+def axF_t_appcond(fs: list[Form], s: Seq) -> list[Seq]:
+
+
+
 
 # Partie 4.3.1
-
-# pas convaincu parce qu'on a déjà des truc n_t_rule axc_t_rule etc
-
-# def is_applicable(fs: list[Form], s: Seq) -> bool:
-#     s_t = s_t_appcond(fs, s)
-#     a_and_t = a_and_t_appcond(fs, s)
-#     axc_t = axc_t_appcond(fs, s)
-#     n_t = n_t_appcond(fs, s)
-
-#     L = [s_t, a_and_t, axc_t, n_t]
-#     return L
-
-
-# Je sais pas ce que t'as fait mais je te le laisse ça
-
-# def next_proof_state(ls: list[Seq]) -> list[list[Seq]]:
-#     L = []
-#     for fs in ls:
-#         lbool = is_applicable
-
 
 calcul = [s_t_rule, a_and_t_rule, axc_t_rule, n_t_rule]
 
@@ -222,7 +209,39 @@ def dfs (nexts: Callable [[PS], list[PS]],
             # return [states [0]] + dfs(nexts , sol , nexts(states [0]) + states [1:])
             else:
                 return dfs(nexts , sol , nexts(states [0]) + states [1:])
+
+
+def sol_proof_state(ps: ProofStateV0) -> bool:
+    """
+    verifie que toutes lees preuves globales du sequent de depart ont ete prouvees
+    """
+    return ps == []
+
+
+
+# tests
+
+p = Var("p")
+q = Var("q")
+
+s1 = Seq([p, Not(p)], FF())
+res1 = dfs(next_proof_state, sol_proof_state, [[s1]])
+print("Test 1 :", res1 == [[]])
+
+s2 = Seq([p], p)
+res2 = dfs(next_proof_state, sol_proof_state, [[s2]])
+print("Test 2 :", res2 == [[]])
+
+s3 = Seq([And(p, q), Not(p)], FF())
+res3 = dfs(next_proof_state, sol_proof_state, [[s3]])
+print("Test 3 :", res3 == [[]])
+
+s4 = Seq([p], q)
+res4 = dfs(next_proof_state, sol_proof_state, [[s4]])
+print("Test 4 :", res4 == [])
+
             
+"""
 def nexts_nat (n: int) -> int:
     if n < 20:
         return [2 * n, 2 * n + 1]
@@ -231,3 +250,4 @@ def nexts_nat (n: int) -> int:
     
 def sol_nat (n: int) -> bool:
     return (n % 5 == 0)
+"""
