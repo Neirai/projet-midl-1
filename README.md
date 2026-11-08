@@ -4,7 +4,7 @@ Projet MIDL 1 (2026-2027) : implémentation en Python du calcul des Tableaux et 
 
 ## Description
 ---
-Projet réalise dans le cadre de l'UE "Projet MIDL 1" de L2. L'objectif est ... (j'ai pas encore lu le sujet)
+Projet réalise dans le cadre de l'UE "Projet MIDL 1" de L2. L'objectif est d'implémenter la méthode du calcul des *Tableaux* dans le but d'automatiser des preuves en Déduction Naturelle (DN).
 
 ## Auteurs
 ---
@@ -15,4 +15,4 @@ FRANÇOIS Elise - 22501097
 
 ### Dernière modification
 
-11-10-2026
+08-11-2026

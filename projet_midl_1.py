@@ -324,19 +324,7 @@ def dfs (nexts: Callable [[PS], list[PS]],
 
 def sol_proof_state(ps: ProofStateV0) -> bool:
     """
-    verifie que toutes le   s preuves globales du sequent de depart ont ete prouvees
+    verifie que toutes les preuves globales du sequent de depart ont ete prouvees
     """
     return ps == []
             
-"""
-Fonctions non-nécessaires données dans le sujet
-
-def nexts_nat (n: int) -> int:
-    if n < 20:
-        return [2 * n, 2 * n + 1]
-    else:
-        return []
-    
-def sol_nat (n: int) -> bool:
-    return (n % 5 == 0)
-"""
