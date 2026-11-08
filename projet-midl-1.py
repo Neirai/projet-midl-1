@@ -60,7 +60,7 @@ def formToNNF(f: Form) -> Form:
         case Not(And(a, b)):
             return Or(formToNNF(Not(a)), formToNNF(Not(b)))
         case Not(Or(a, b)):
-            return And(formToNNF(Not(a)), formToNNF(Not(f)))
+            return And(formToNNF(Not(a)), formToNNF(Not(b)))
         case Not(Impl(a, b)):
             return And(formToNNF(a), formToNNF(Not(b)))
         case f:
@@ -206,7 +206,7 @@ def a_or_t_appcond(fs: list[Form], s: Seq) -> bool:
 def a_or_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match(fs, s):
         case ([Not(Or(a, b))], Seq(g, FF())):
-            return [Seq(insert_forms(insert_forms(g, Not(a))), Not(b)), FF()]
+            return [Seq(insert_forms(insert_forms(g, Not(a)), Not(b)), FF())]
         case _:
             return []
 
@@ -244,7 +244,7 @@ def a_impl_t_appcond(fs: list[Form], s: Seq) -> bool:
 def a_impl_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match (fs, s):
         case ([Not(Impl(a, b))], Seq(g, FF())):
-            return [Seq(insert_forms(insert_forms(g, a)), Not(b), FF())]
+            return [Seq(insert_forms(insert_forms(g, a), Not(b)), FF())]
         case _:
             return []
 
@@ -273,7 +273,11 @@ b_impl_t_rule = Rule("b_impl_t", b_impl_t_appcond, b_impl_t_action)
 
 # Partie 4.3.1
 
-rules = [s_t_rule, a_and_t_rule, axc_t_rule, n_t_rule]
+rules = [
+    s_t_rule, axf_t_rule, axc_t_rule, n_t_rule, 
+    a_and_t_rule, b_and_t_rule, a_or_t_rule, b_or_t_rule, 
+    a_impl_t_rule, b_impl_t_rule
+]
 
 def next_proof_state(ps: ProofStateV0) -> list[ProofStateV0]:
     
@@ -323,32 +327,10 @@ def sol_proof_state(ps: ProofStateV0) -> bool:
     verifie que toutes le   s preuves globales du sequent de depart ont ete prouvees
     """
     return ps == []
-
-
-
-# tests
-
-p = Var("p")
-q = Var("q")
-
-s1 = Seq([p, Not(p)], FF())
-res1 = dfs(next_proof_state, sol_proof_state, [[s1]])
-print("Test 1 :", res1 == [[]])
-
-s2 = Seq([p], p)
-res2 = dfs(next_proof_state, sol_proof_state, [[s2]])
-print("Test 2 :", res2 == [[]])
-
-s3 = Seq([And(p, q), Not(p)], FF())
-res3 = dfs(next_proof_state, sol_proof_state, [[s3]])
-print("Test 3 :", res3 == [[]])
-
-s4 = Seq([p], q)
-res4 = dfs(next_proof_state, sol_proof_state, [[s4]])
-print("Test 4 :", res4 == [])
-
             
 """
+Fonctions non-nécessaires données dans le sujet
+
 def nexts_nat (n: int) -> int:
     if n < 20:
         return [2 * n, 2 * n + 1]
