@@ -13,9 +13,7 @@ def main():
         print("2 - Exéctuer le fichier de tests")
         print("3 - Quitter\n")
 
-        choix = input("Votre choix : ")
-
-        match choix:
+        match input("Votre choix : "):
             case "1":
                 print("Séquent issu du cours de Philosophie des Sciences")
                 print("Hypothèses : n -> f, v -> f, n ∨ v, e -> ¬f")
@@ -23,7 +21,7 @@ def main():
                 
                 n = Var("n")
                 f = Var("f")
-                v = Var("f")
+                v = Var("v")
                 e = Var("e")
                 
                 sequent_demo = Seq([Impl(n,f),Impl(v,f),Or(n,v),Impl(e,Not(f))], Not(e))
@@ -33,15 +31,18 @@ def main():
                 resultat = dfs(next_proof_state, sol_proof_state, etat_initial)
                 
                 if resultat == [[]]:
-                    print("✅ Résultat : Le séquent est PROUVABLE.")
+                    print("Résultat : Le séquent est PROUVABLE.")
                 else:
-                    print("❌ Résultat : Le séquent N'EST PAS prouvable.")
+                    print("Résultat : Le séquent N'EST PAS prouvable.")
             
             case "2":
                 run_tests()
                 
             case "3":
                 return
+
+            case _:
+                print("Choix invalide. Veuillez choisir un nombre parmi : 1, 2 ou 3.")
 
 if __name__ == "__main__":
     main()
