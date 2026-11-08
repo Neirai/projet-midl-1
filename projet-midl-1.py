@@ -159,27 +159,7 @@ n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
 
 # Partie 4.3.1
 
-# pas convaincu parce qu'on a déjà des truc n_t_rule axc_t_rule etc
-
-# def is_applicable(fs: list[Form], s: Seq) -> bool:
-#     s_t = s_t_appcond(fs, s)
-#     a_and_t = a_and_t_appcond(fs, s)
-#     axc_t = axc_t_appcond(fs, s)
-#     n_t = n_t_appcond(fs, s)
-
-#     L = [s_t, a_and_t, axc_t, n_t]
-#     return L
-
-
-# Je sais pas ce que t'as fait mais je te le laisse ça
-
-# def next_proof_state(ls: list[Seq]) -> list[list[Seq]]:
-#     L = []
-#     for fs in ls:
-#         lbool = is_applicable
-
-
-calcul = [s_t_rule, a_and_t_rule, axc_t_rule, n_t_rule]
+rules = [s_t_rule, a_and_t_rule, axc_t_rule, n_t_rule]
 
 def next_proof_state(ps: ProofStateV0) -> list[ProofStateV0]:
     
@@ -190,13 +170,13 @@ def next_proof_state(ps: ProofStateV0) -> list[ProofStateV0]:
     seq = ps[0]
     nextProofState = []
     
-    for rule in calcul:
+    for rule in rules:
         if rule.appcond([], seq):
             ProofStateV1 = rule.action([], seq) + ps[1:]
             nextProofState.append(ProofStateV1)
    
     for hyp in seq.hyps:
-        for rule in calcul:
+        for rule in rules:
             if rule.appcond([hyp], seq):
                 ProofStateV1 = rule.action([hyp], seq) + ps[1:]
                 nextProofState.append(ProofStateV1)
