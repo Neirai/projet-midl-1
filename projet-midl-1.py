@@ -68,14 +68,14 @@ def formToNNF(f: Form) -> Form:
 
 
 
+#Partie 4.2
 
 #Start
 
-def insert_forms(lf: list[Form], f: list[Form]) -> list[Form]:
+def insert_forms(lf: list[Form], f: Form) -> list[Form]:
     new_list = lf.copy()
-    for elem in f:
-        if elem not in lf:
-            new_list += [elem]
+    if f not in new_list:
+        new_list.append(f)
     return new_list
 
 def s_t_appcond(fs: list[Form], s: Seq) -> bool:
@@ -88,34 +88,30 @@ def s_t_appcond(fs: list[Form], s: Seq) -> bool:
 def s_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match (fs, s):
         case ([], Seq(g, a)):
-            return [Seq(insert_forms(g, [Not(a)]), FF())]
+            return [Seq(insert_forms(g, Not(a)), FF())]
         case _:
             return []
 
 s_t_rule = Rule("s_t", s_t_appcond , s_t_action )
 
 
-#Aand
+#Axiome F
 
-def not_both_in(a: list[Form], b: list[Form], g: list[Form]) -> bool:
-    return (a not in g) or (b not in g)
-    
-    
-def a_and_t_appcond (fs: list[Form], s: Seq) -> bool:
+def axf_t_appcond(fs: list[Form], s: Seq) -> bool:
     match (fs, s):
-        case ([And(a, b)], Seq(g, FF())):
-            return (not_both_in (a, b, g))
+        case ([], Seq(g, FF())):
+            return FF() in g
         case _:
-            return (False)
-        
-def a_and_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+            return False
+
+def axf_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match (fs, s):
-        case ([And(a, b)], Seq(g, FF())):
-            return [Seq(insert_forms(g, [a, b]), FF())]
+        case ([], Seq(g, FF())):
+            return []
         case _:
             return []
-    
-a_and_t_rule = Rule("a_and_t", a_and_t_appcond, a_and_t_action)
+
+axf_t_rule = Rule("axf_t", axf_t_appcond, axf_t_action)
     
     
 #Axiome C
@@ -149,11 +145,129 @@ def n_t_appcond(fs: list[Form], s: Seq) -> bool:
 def n_t_action(fs: list[Form], s: Seq) -> list[Seq]:
     match (fs, s):
         case ([Not(Not(a))], Seq(g, FF())):
-            return [Seq(insert_forms(g, [a]), FF())]
+            return [Seq(insert_forms(g, a), FF())]
         case _:
             return []
         
 n_t_rule = Rule("n_t", n_t_appcond, n_t_action)
+
+
+#Aand
+
+def not_both_in(a: list[Form], b: list[Form], g: list[Form]) -> bool:
+    return (a not in g) or (b not in g)
+    
+    
+def a_and_t_appcond (fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([And(a, b)], Seq(g, FF())):
+            return (not_both_in (a, b, g))
+        case _:
+            return (False)
+        
+def a_and_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([And(a, b)], Seq(g, FF())):
+            return [Seq(insert_forms(insert_forms(g, a), b), FF())]
+        case _:
+            return []
+    
+a_and_t_rule = Rule("a_and_t", a_and_t_appcond, a_and_t_action)
+
+
+#Band
+
+def b_and_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([Not(And(a, b))], Seq(g, FF())):
+            return Not(a) not in g and Not(b) not in g
+        case _:
+            return False
+
+def b_and_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([Not(And(a, b))], Seq(g, FF())):
+            return [Seq(insert_forms(g, Not(a)), FF()), Seq(insert_forms(g, Not(b)), FF())]
+        case _:
+            return []
+
+b_and_t_rule = Rule("b_and_t", b_and_t_appcond, b_and_t_action)
+
+
+#Aor
+
+def a_or_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([Not(Or(a, b))], Seq(g, FF())):
+            return not_both_in(Not(a), Not(b), g)
+        case _:
+            return False
+
+def a_or_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match(fs, s):
+        case ([Not(Or(a, b))], Seq(g, FF())):
+            return [Seq(insert_forms(insert_forms(g, Not(a))), Not(b)), FF()]
+        case _:
+            return []
+
+a_or_t_rule = Rule("aor_t", a_or_t_appcond, a_or_t_action)
+
+
+#Bor
+
+def b_or_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([Or(a, b)], Seq(g,  FF())):
+            return a not in g and b not in g
+        case _:
+            return False
+
+def b_or_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([Or(a, b)], Seq(g,  FF())):
+            return [Seq(insert_forms(g, a), FF()), Seq(insert_forms(g, b), FF())]
+        case _:
+            return []
+
+b_or_t_rule = Rule("bor_t", b_or_t_appcond, b_or_t_action)
+
+
+#Aimpl
+
+def a_impl_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match (fs, s):
+        case ([Not(Impl(a, b))], Seq(g, FF())):
+            return not_both_in(a, Not(b), g)
+        case _:
+            return False
+
+def a_impl_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([Not(Impl(a, b))], Seq(g, FF())):
+            return [Seq(insert_forms(insert_forms(g, a)), Not(b), FF())]
+        case _:
+            return []
+
+a_impl_t_rule = Rule("a_impl_t", a_impl_t_appcond, a_impl_t_action)
+
+
+#Bimple
+
+def b_impl_t_appcond(fs: list[Form], s: Seq) -> bool:
+    match(fs, s):
+        case ([Impl(a, b)], Seq(g, FF())):
+            return Not(a) not in g and b not in g
+        case _:
+            return False
+
+def b_impl_t_action(fs: list[Form], s: Seq) -> list[Seq]:
+    match (fs, s):
+        case ([Impl(a, b)], Seq(g, FF())):
+            return [Seq(insert_forms(g, Not(a)), FF()), Seq(insert_forms(g, b), FF())]
+        case _:
+            return []
+        
+b_impl_t_rule = Rule("b_impl_t", b_impl_t_appcond, b_impl_t_action)
 
 
 
@@ -202,7 +316,39 @@ def dfs (nexts: Callable [[PS], list[PS]],
             # return [states [0]] + dfs(nexts , sol , nexts(states [0]) + states [1:])
             else:
                 return dfs(nexts , sol , nexts(states [0]) + states [1:])
+
+
+def sol_proof_state(ps: ProofStateV0) -> bool:
+    """
+    verifie que toutes le   s preuves globales du sequent de depart ont ete prouvees
+    """
+    return ps == []
+
+
+
+# tests
+
+p = Var("p")
+q = Var("q")
+
+s1 = Seq([p, Not(p)], FF())
+res1 = dfs(next_proof_state, sol_proof_state, [[s1]])
+print("Test 1 :", res1 == [[]])
+
+s2 = Seq([p], p)
+res2 = dfs(next_proof_state, sol_proof_state, [[s2]])
+print("Test 2 :", res2 == [[]])
+
+s3 = Seq([And(p, q), Not(p)], FF())
+res3 = dfs(next_proof_state, sol_proof_state, [[s3]])
+print("Test 3 :", res3 == [[]])
+
+s4 = Seq([p], q)
+res4 = dfs(next_proof_state, sol_proof_state, [[s4]])
+print("Test 4 :", res4 == [])
+
             
+"""
 def nexts_nat (n: int) -> int:
     if n < 20:
         return [2 * n, 2 * n + 1]
@@ -211,3 +357,4 @@ def nexts_nat (n: int) -> int:
     
 def sol_nat (n: int) -> bool:
     return (n % 5 == 0)
+"""
